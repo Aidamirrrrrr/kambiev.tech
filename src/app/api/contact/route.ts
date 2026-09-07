@@ -1,85 +1,95 @@
-/** API-маршрут отправки заявки в Telegram через Bot API. */
+/** Приём заявки с формы и пересылка её в Telegram. */
 
 import { NextResponse } from "next/server";
+import { escapeHtml, sendMessage } from "@/lib/telegram";
 
-const TELEGRAM_API = "https://api.telegram.org";
-const MAX_NAME = 100;
-const MAX_CONTACT = 200;
-const MAX_MESSAGE = 3000;
+const LIMITS = { name: 100, contact: 200, message: 3000 } as const;
+const MIN_CONTACT_LENGTH = 3;
 
-/** Экранирует спецсимволы HTML для parse_mode: "HTML". */
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+type Payload = {
+  name: string;
+  contact: string;
+  message: string;
+  locale: string;
+};
+
+/**
+ * Тело приходит из сети, поэтому проверяем и типы, и содержимое.
+ * Без проверки типа `trim()` на числе бросал исключение, и клиент получал
+ * 500 вместо внятного 400.
+ */
+function parsePayload(body: unknown): Payload | null {
+  if (typeof body !== "object" || body === null) return null;
+
+  const { name, contact, message, locale } = body as Record<string, unknown>;
+  if (
+    typeof name !== "string" ||
+    typeof contact !== "string" ||
+    typeof message !== "string"
+  ) {
+    return null;
+  }
+
+  const trimmed = {
+    name: name.trim(),
+    contact: contact.trim(),
+    message: message.trim(),
+  };
+  if (!trimmed.name || !trimmed.message) return null;
+  if (trimmed.contact.length < MIN_CONTACT_LENGTH) return null;
+
+  return {
+    name: trimmed.name.slice(0, LIMITS.name),
+    contact: trimmed.contact.slice(0, LIMITS.contact),
+    message: trimmed.message.slice(0, LIMITS.message),
+    locale: locale === "en" ? "en" : "ru",
+  };
+}
+
+function format({ name, contact, message, locale }: Payload): string {
+  const ru = locale === "ru";
+  return [
+    `<b>${ru ? "Новая заявка с сайта" : "New inquiry from the website"}</b>`,
+    "",
+    `<b>${ru ? "Имя" : "Name"}:</b> ${escapeHtml(name)}`,
+    `<b>${ru ? "Контакт" : "Contact"}:</b> ${escapeHtml(contact)}`,
+    "",
+    `<b>${ru ? "Сообщение" : "Message"}:</b>`,
+    escapeHtml(message),
+  ].join("\n");
 }
 
 export async function POST(request: Request) {
+  let payload: Payload | null;
   try {
-    const { name, contact, message, locale } = await request.json();
-    const isRu = locale === "ru";
+    payload = parsePayload(await request.json());
+  } catch {
+    // Тело оказалось не JSON: это ошибка запроса, а не сбой сервера.
+    return NextResponse.json({ error: "Malformed body" }, { status: 400 });
+  }
 
-    if (!name?.trim() || !contact?.trim() || !message?.trim()) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 },
-      );
-    }
+  if (!payload) {
+    return NextResponse.json({ error: "Invalid fields" }, { status: 400 });
+  }
 
-    if (contact.trim().length < 3) {
-      return NextResponse.json({ error: "Invalid contact" }, { status: 400 });
-    }
-
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
-
-    if (!token || !chatId) {
-      console.error(
-        "Contact form: TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы",
-      );
-      return NextResponse.json(
-        { error: "Messaging is not configured" },
-        { status: 500 },
-      );
-    }
-
-    const text = [
-      `<b>${isRu ? "Новая заявка с сайта" : "New inquiry from the website"}</b>`,
-      "",
-      `<b>${isRu ? "Имя" : "Name"}:</b> ${escapeHtml(name.trim().slice(0, MAX_NAME))}`,
-      `<b>${isRu ? "Контакт" : "Contact"}:</b> ${escapeHtml(contact.trim().slice(0, MAX_CONTACT))}`,
-      "",
-      `<b>${isRu ? "Сообщение" : "Message"}:</b>`,
-      escapeHtml(message.trim().slice(0, MAX_MESSAGE)),
-    ].join("\n");
-
-    const res = await fetch(`${TELEGRAM_API}/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
-    });
-
-    if (!res.ok) {
-      const details = await res.text();
-      console.error("Telegram sendMessage failed:", res.status, details);
-      return NextResponse.json(
-        { error: "Failed to send message" },
-        { status: 502 },
-      );
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Contact form error:", error);
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) {
+    console.error(
+      "Contact form: TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы",
+    );
     return NextResponse.json(
-      { error: "Failed to send message" },
+      { error: "Messaging is not configured" },
       { status: 500 },
     );
   }
+
+  try {
+    await sendMessage(token, chatId, format(payload));
+  } catch (error) {
+    console.error("Contact form: не удалось отправить сообщение", error);
+    return NextResponse.json({ error: "Failed to send" }, { status: 502 });
+  }
+
+  return NextResponse.json({ success: true });
 }

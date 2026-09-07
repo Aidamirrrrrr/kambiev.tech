@@ -33,8 +33,11 @@ function parseAcceptLanguage(header: string): "ru" | "en" {
   const languages = header
     .split(",")
     .map((part) => {
-      const [lang, q] = part.trim().split(";q=");
-      return { lang: lang.trim().toLowerCase(), q: q ? parseFloat(q) : 1 };
+      const [lang = "", q] = part.trim().split(";q=");
+      return {
+        lang: lang.trim().toLowerCase(),
+        q: q ? Number.parseFloat(q) : 1,
+      };
     })
     .sort((a, b) => b.q - a.q);
 

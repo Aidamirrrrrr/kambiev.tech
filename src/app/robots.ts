@@ -31,9 +31,7 @@ const AI_CRAWLERS = [
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      // /resume.pdf отдаётся роутом, но ссылок на него на сайте нет
-      // и в индексе ему делать нечего: в файле телефон и зарплата.
-      { userAgent: "*", allow: "/", disallow: ["/api/", "/resume.pdf"] },
+      { userAgent: "*", allow: "/", disallow: ["/api/"] },
       ...AI_CRAWLERS.map((userAgent) => ({ userAgent, allow: "/" })),
     ],
     sitemap: absoluteUrl("/sitemap.xml"),

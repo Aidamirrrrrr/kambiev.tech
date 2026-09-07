@@ -27,9 +27,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 COPY --from=builder /app/public ./public
 
-# Точка монтирования тома с резюме: файл подменяется ботом, а не пересборкой.
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
-VOLUME /app/data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

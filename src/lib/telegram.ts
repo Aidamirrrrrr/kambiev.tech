@@ -43,36 +43,3 @@ export async function sendMessage(
     );
   }
 }
-
-/** Возвращает путь к файлу внутри хранилища Telegram по его file_id. */
-export async function getFilePath(token: string, fileId: string) {
-  const res = await fetch(
-    `${TELEGRAM_API}/bot${token}/getFile?file_id=${encodeURIComponent(fileId)}`,
-  );
-
-  if (!res.ok) {
-    throw new Error(`Telegram getFile failed: ${res.status}`);
-  }
-
-  const body = (await res.json()) as {
-    ok: boolean;
-    result?: { file_path?: string };
-  };
-  const filePath = body.result?.file_path;
-  if (!body.ok || !filePath) {
-    throw new Error("Telegram getFile returned no file_path");
-  }
-
-  return filePath;
-}
-
-/** Скачивает файл, ранее полученный через getFilePath. */
-export async function downloadFile(token: string, filePath: string) {
-  const res = await fetch(`${TELEGRAM_API}/file/bot${token}/${filePath}`);
-
-  if (!res.ok) {
-    throw new Error(`Telegram file download failed: ${res.status}`);
-  }
-
-  return Buffer.from(await res.arrayBuffer());
-}

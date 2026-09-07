@@ -25,7 +25,6 @@ export const en: Dictionary = {
     stack: "Stack",
     contact: "Contact",
     cta: "Get in touch",
-    resume: "Résumé",
   },
   hero: {
     label: "Fullstack Developer",
@@ -36,8 +35,6 @@ export const en: Dictionary = {
       "I build digital products end to end, from the server to the screen in your hand.",
     now: "VELIZHANIN · since December 2025",
     cta: "View projects",
-    resume: "Download résumé",
-    scroll: "Scroll down",
   },
   about: {
     label: "About me",
@@ -47,7 +44,6 @@ export const en: Dictionary = {
       "Fullstack developer with four years of commercial experience. I own the product end to end: architecture and database design, REST APIs, backend and frontend, third-party integrations, job queues, CI/CD, deployment and production support.",
     text2:
       "I've worked on payment systems, Telegram Mini Apps, SSR applications and heavily integrated backend services. I run code reviews, mentored three junior developers and introduced engineering standards. My own product reached 2,000+ users with a paying audience.",
-    capTitle: "What I cover myself",
     cap1t: "Backend and data",
     cap1d:
       "REST APIs on NestJS, PostgreSQL schemas, job queues, integrations and payments.",
@@ -134,7 +130,6 @@ export const en: Dictionary = {
     titleAccent: "built",
     cta: "Discuss a project",
     private: "Private repository",
-    source: "View source",
     moreTitle: "Other projects",
     p1facts: [
       "An API of five domain modules",
@@ -215,18 +210,9 @@ export const en: Dictionary = {
     m3name: "ALEVROLLS",
     m3desc:
       "A food delivery service on Next.js integrated with the iiko Cloud API: menu and orders from the accounting system, Telegram auth, a persistent cart and order history.",
-    m4name: "Red Dragon Way",
-    m4desc:
-      "A site for a Chinese language school on Next.js, with an architecture optimised for SEO.",
     m5name: "MOSK: bot and admin panel",
     m5desc:
       "Intake and moderation of event submissions for a Telegram channel: a Grammy and Bun bot for submitting, a Next.js admin panel for moderation, and YooKassa payments for publication. The whole path from submission to publication is automated.",
-    m6name: "MOSK: web",
-    m6desc:
-      "Two commercial Next.js sites built around visual design and performance: an Awwwards-style promo landing and a site with paid service checkout through YooKassa. Both score 100/100 in Google Lighthouse.",
-    m7name: "Keel",
-    m7desc:
-      "A pet project: a VS Code extension that turns a model on your own machine into a working coding agent. It talks to Ollama, and nothing leaves the machine. Writes are shown as a diff before they happen, destructive commands are always confirmed, plus subagents and MCP.",
   },
   stack: {
     label: "Stack",
@@ -262,7 +248,6 @@ export const en: Dictionary = {
     sending: "Sending...",
     sent: "Sent ✓",
     error: "Error, try again",
-    resume: "Download résumé (PDF)",
   },
   footer: {
     rights: "All rights reserved.",

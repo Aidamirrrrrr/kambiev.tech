@@ -13,6 +13,9 @@ export type TechItem = {
   featured?: boolean;
 };
 
+/** Ключи категорий выводятся из данных: карта названий обязана покрыть все. */
+export type CategoryKey = (typeof techCategories)[number]["key"];
+
 export const techCategories = [
   {
     key: "frontend" as const,

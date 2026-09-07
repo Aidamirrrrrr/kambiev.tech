@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { Disclosure } from "@/components/disclosure";
 import { LocaleTransition } from "@/components/locale-transition";
 import { useI18n } from "@/lib/i18n";
-import { type TechItem, techCategories } from "@/lib/stack";
+import { type CategoryKey, type TechItem, techCategories } from "@/lib/stack";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -45,7 +45,7 @@ export function Stack() {
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { t } = useI18n();
 
-  const categoryNames: Record<string, string> = {
+  const categoryNames: Record<CategoryKey, string> = {
     frontend: t.stack.frontend,
     backend: t.stack.backend,
     tools: t.stack.tools,

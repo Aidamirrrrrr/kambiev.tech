@@ -24,7 +24,10 @@ const UPDATED = "7 сентября 2026";
 
 type Block = { h: string; p: string[] };
 
-const ru = {
+/** Обе локали обязаны совпадать по форме: пропуск блока станет ошибкой типов. */
+type Content = { title: string; intro: string; back: string; blocks: Block[] };
+
+const ru: Content = {
   title: "Политика конфиденциальности",
   intro: `Сайт ${site.domain}, личное портфолио. Персональные данные собираются здесь только через форму обратной связи и только те, которые вы вписали сами. Обновлено ${UPDATED}.`,
   back: "На главную",
@@ -67,10 +70,10 @@ const ru = {
         `Вы можете попросить удалить своё обращение или узнать, что именно было получено. Напишите на ${EMAIL}, и запрос будет выполнен.`,
       ],
     },
-  ] as Block[],
+  ],
 };
 
-const en = {
+const en: Content = {
   title: "Privacy policy",
   intro: `${site.domain} is a personal portfolio. Personal data is collected here only through the contact form, and only what you typed in yourself. Updated 7 September 2026.`,
   back: "Back home",
@@ -113,7 +116,7 @@ const en = {
         `You can ask for your enquiry to be deleted, or ask what exactly was received. Write to ${EMAIL} and the request will be carried out.`,
       ],
     },
-  ] as Block[],
+  ],
 };
 
 export default async function PrivacyPage() {

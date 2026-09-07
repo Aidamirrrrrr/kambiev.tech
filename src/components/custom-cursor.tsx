@@ -51,7 +51,7 @@ export function CustomCursor() {
     };
 
     const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
+      const target = e.target as Element;
       if (
         target.tagName === "A" ||
         target.tagName === "BUTTON" ||
