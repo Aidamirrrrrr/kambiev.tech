@@ -91,6 +91,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE,
   },
+  verification: {
+    yandex: "fcc73919fc7bee99",
+  },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
