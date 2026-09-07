@@ -93,12 +93,11 @@ function ContactForm({
    */
   if (submitted) {
     return (
-      <motion.div
+      <motion.output
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        role="status"
-        className="rounded-2xl border border-accent/30 bg-accent/5 p-8"
+        className="block rounded-2xl border border-accent/30 bg-accent/5 p-8"
       >
         <div className="flex items-start gap-4">
           <span
@@ -129,7 +128,7 @@ function ContactForm({
             </button>
           </div>
         </div>
-      </motion.div>
+      </motion.output>
     );
   }
 
