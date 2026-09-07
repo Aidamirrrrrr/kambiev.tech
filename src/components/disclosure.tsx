@@ -2,7 +2,7 @@
 
 /** Техническая конкретика прячется сюда, чтобы верхний слой оставался коротким. */
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { type ReactNode, useId, useState } from "react";
 
@@ -26,9 +26,7 @@ export function Disclosure({
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        // Блок есть в DOM только когда открыт, поэтому и ссылка ставится только
-        // тогда: иначе расходится гидратация.
-        aria-controls={open ? regionId : undefined}
+        aria-controls={regionId}
         className="inline-flex items-center gap-1 font-medium text-accent text-base transition-colors hover:text-accent-strong"
       >
         {open ? labelOpen : label}
@@ -40,20 +38,25 @@ export function Disclosure({
         />
       </button>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            id={regionId}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full overflow-hidden"
-          >
-            <div className="pt-6">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/*
+        Содержимое рендерится всегда и сворачивается высотой, а не
+        размонтированием. Раньше свёрнутый блок отсутствовал в DOM, и весь
+        технический текст не попадал в HTML: робот кнопки не нажимает, поэтому
+        для поиска этой части сайта просто не существовало.
+
+        inert убирает свёрнутое из фокуса и из проговаривания скринридером,
+        иначе текст был бы доступен клавиатуре, оставаясь невидимым.
+      */}
+      <motion.div
+        id={regionId}
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        inert={!open}
+        className="w-full overflow-hidden"
+      >
+        <div className="pt-6">{children}</div>
+      </motion.div>
     </div>
   );
 }
