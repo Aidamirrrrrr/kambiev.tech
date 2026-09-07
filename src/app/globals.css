@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/*
+ * Палитра сайта. Светлая и спокойная: белая основа, серые полосы для ритма,
+ * почти чёрный текст и единственный акцент на действиях.
+ *
+ * Про контраст. Фирменные серые Apple брать нельзя как есть: #86868b даёт
+ * на белом 3.62:1 и проваливает WCAG AA, а синий #0071e3 на сером #f5f5f7
+ * даёт 4.31:1 и тоже не проходит. Поэтому вторичный текст темнее (#6e6e73,
+ * 5.07:1), а синий взят глубже (#0066cc, 5.57:1 на белом и 5.11:1 на сером).
+ * Не осветляй эти три токена: сломается доступность.
+ */
+@theme {
+  --color-page: #ffffff;
+  --color-surface: #f5f5f7;
+  --color-surface-2: #ebebed;
+  --color-line: #d2d2d7;
+  --color-line-strong: #b8b8bf;
+  --color-fg: #1d1d1f;
+  --color-fg-muted: #515154;
+  --color-fg-dim: #6e6e73;
+  --color-accent: #0066cc;
+  --color-accent-strong: #0058b0;
+}
+
+@layer base {
+  /* Цвет границы по умолчанию: часть утилит пишется без явного цвета,
+     а без этого Tailwind ставит currentColor и границы красятся текстом. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  body {
+    background-color: var(--color-page);
+    color: var(--color-fg);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7c7cc;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8ae;
+}
+
+::selection {
+  background: #0066cc;
+  color: #ffffff;
+}
+
+/* Ниже !important обязателен: только так перебиваются inline-стили Framer
+   Motion, иначе сброс анимаций не сработает. Длинное тире здесь и ниже
+   допустимо: это комментарии в коде, а не текст сайта. */
+/* biome-ignore-start lint/complexity/noImportantStyles: перебиваем inline-стили Framer Motion */
+/*
+ * Уважение к системной настройке «меньше движения».
+ *
+ * Framer Motion держит стартовое состояние в inline-стилях, поэтому мало
+ * отключить анимации — без принудительной непрозрачности контент остался бы
+ * невидимым для тех, кто отключил анимации.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [style*="opacity"] {
+    opacity: 1 !important;
+  }
+
+  [style*="translate"],
+  [style*="scale"] {
+    transform: none !important;
+  }
+}
+/* biome-ignore-end lint/complexity/noImportantStyles: конец блока */
+
+/* Запас под фиксированную шапку на случай, если якорь отработает нативно:
+   при переходе по ссылке из адресной строки или с отключённым JS. */
+:target,
+section[id] {
+  scroll-margin-top: 5rem;
+}
+
+html {
+  background-color: #ffffff;
+  scrollbar-width: thin;
+  scrollbar-color: #c7c7cc transparent;
+}
