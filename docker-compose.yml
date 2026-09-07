@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file: .env
+    environment:
+      # Резюме живёт на томе, а не в образе, — бот подменяет его на лету.
+      RESUME_PATH: /app/data/resume.pdf
+    volumes:
+      - resume-data:/app/data
+
+volumes:
+  resume-data:
