@@ -8,21 +8,7 @@
  */
 
 import { useEffect, useState } from "react";
-
-const copy = {
-  ru: {
-    title: "Что-то сломалось",
-    text: "Страница не отрисовалась. Можно попробовать ещё раз или вернуться на главную.",
-    retry: "Попробовать снова",
-    home: "На главную",
-  },
-  en: {
-    title: "Something broke",
-    text: "The page failed to render. Try again, or go back to the homepage.",
-    retry: "Try again",
-    home: "Back home",
-  },
-} as const;
+import { pages } from "@/lib/dictionaries/pages";
 
 export default function ErrorBoundary({
   error,
@@ -42,7 +28,7 @@ export default function ErrorBoundary({
     console.error("Render error:", error.digest ?? "", error);
   }, [error]);
 
-  const t = copy[lang];
+  const t = pages[lang].error;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-page px-6">

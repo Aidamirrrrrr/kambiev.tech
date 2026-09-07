@@ -3,30 +3,17 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { pages } from "@/lib/dictionaries/pages";
 
 export const metadata: Metadata = {
   title: "Страница не найдена",
   robots: { index: false, follow: true },
 };
 
-const copy = {
-  ru: {
-    code: "404",
-    title: "Такой страницы нет",
-    text: "Возможно, адрес набран с опечаткой или страница переехала.",
-    back: "На главную",
-  },
-  en: {
-    code: "404",
-    title: "This page does not exist",
-    text: "The address may have a typo, or the page has moved.",
-    back: "Back home",
-  },
-} as const;
-
 export default async function NotFound() {
   const cookieStore = await cookies();
-  const t = cookieStore.get("locale")?.value === "en" ? copy.en : copy.ru;
+  const lang = cookieStore.get("locale")?.value === "en" ? "en" : "ru";
+  const t = pages[lang].notFound;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-page px-6">
