@@ -72,6 +72,7 @@ export function ProjectBand({
   };
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const layersRef = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-12%" });
   const onGray = index % 2 === 1;
 
@@ -79,10 +80,21 @@ export function ProjectBand({
    * Три слоя идут с разной скоростью, поэтому полоса читается глубиной.
    * Смещения в пикселях, а не в процентах: высота кадра гуляет от 500 до 1172
    * пикселей, и на процентах большие полосы наезжали бы на список фактов.
+   *
+   * Ход считается по слоям, а не по всей полосе: раскрытие подробностей лежит
+   * ниже и меняет высоту полосы, то есть и диапазон хода. Теперь цель не растёт
+   * и отображение остаётся тем же самым.
+   *
+   * trackContentSize нужен для раскрытий в других секциях: они сдвигают полосу
+   * вниз. useScroll с заданной целью не использует нативный ScrollTimeline и
+   * пересчитывает границы только по resize окна и по скроллу, поэтому замер
+   * оставался старым, а первый же скролл пересчитывал его и кадр прыгал.
+   * С этим флагом Motion следит за высотой документа и пересчитывает сразу.
    */
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: layersRef,
     offset: ["start end", "end start"],
+    trackContentSize: true,
   });
   const headY = useTransform(scrollYProgress, [0, 1], [24, -24]);
   const mediaY = useTransform(scrollYProgress, [0, 1], [72, -72]);
@@ -97,48 +109,50 @@ export function ProjectBand({
         transition={{ duration: 1, ease }}
         className="mx-auto max-w-6xl px-6 py-24 sm:py-32"
       >
-        <motion.div
-          style={{ y: headY }}
-          className="mx-auto max-w-4xl text-center"
-        >
-          <p className="font-medium text-accent text-sm">
-            <LocaleTransition className="inline">
-              {project.category}
-            </LocaleTransition>
-          </p>
-
-          <h3 className="mt-3 font-semibold text-4xl text-fg tracking-tight sm:text-5xl">
-            {project.title}
-          </h3>
-
-          <p className="mx-auto mt-5 max-w-3xl text-fg-muted text-xl leading-relaxed">
-            <LocaleTransition>{project.short}</LocaleTransition>
-          </p>
-        </motion.div>
-
-        {project.media.kind !== "none" && (
+        <div ref={layersRef}>
           <motion.div
-            style={{ y: mediaY, scale: mediaScale }}
-            className="mt-20 origin-bottom sm:mt-24"
+            style={{ y: headY }}
+            className="mx-auto max-w-4xl text-center"
           >
-            <Media media={project.media} title={project.title} />
-          </motion.div>
-        )}
+            <p className="font-medium text-accent text-sm">
+              <LocaleTransition className="inline">
+                {project.category}
+              </LocaleTransition>
+            </p>
 
-        {/* Просто факты, а не пары «термин-определение», поэтому ul, а не dl. */}
-        <motion.ul
-          style={{ y: factsY }}
-          className="mt-20 grid gap-x-8 gap-y-6 sm:mt-24 sm:grid-cols-3"
-        >
-          {project.facts.map((fact) => (
-            <li
-              key={fact}
-              className="border-line border-t pt-5 text-base text-fg leading-snug"
+            <h3 className="mt-3 font-semibold text-4xl text-fg tracking-tight sm:text-5xl">
+              {project.title}
+            </h3>
+
+            <p className="mx-auto mt-5 max-w-3xl text-fg-muted text-xl leading-relaxed">
+              <LocaleTransition>{project.short}</LocaleTransition>
+            </p>
+          </motion.div>
+
+          {project.media.kind !== "none" && (
+            <motion.div
+              style={{ y: mediaY, scale: mediaScale }}
+              className="mt-20 origin-bottom sm:mt-24"
             >
-              <LocaleTransition>{fact}</LocaleTransition>
-            </li>
-          ))}
-        </motion.ul>
+              <Media media={project.media} title={project.title} />
+            </motion.div>
+          )}
+
+          {/* Просто факты, а не пары «термин-определение», поэтому ul, а не dl. */}
+          <motion.ul
+            style={{ y: factsY }}
+            className="mt-20 grid gap-x-8 gap-y-6 sm:mt-24 sm:grid-cols-3"
+          >
+            {project.facts.map((fact) => (
+              <li
+                key={fact}
+                className="border-line border-t pt-5 text-base text-fg leading-snug"
+              >
+                <LocaleTransition>{fact}</LocaleTransition>
+              </li>
+            ))}
+          </motion.ul>
+        </div>
 
         <div className="mt-10 flex justify-center">
           <Disclosure
