@@ -29,18 +29,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not configured" }, { status: 500 });
   }
 
-  // Подпись считается по сырому телу — пересобранный JSON её не пройдёт.
+  // Подпись считается по сырому телу: пересобранный JSON её не пройдёт.
   const payload = await request.text();
+
+  /*
+   * Заголовки отдаём целиком. Resend подписывает по спецификации Standard
+   * Webhooks и шлёт webhook-id / webhook-timestamp / webhook-signature, тогда
+   * как исторический префикс у Svix свой: svix-id и далее. Библиотека умеет
+   * оба, но выбирает через ??, поэтому подстановка пустой строки вместо
+   * отсутствующего svix-id глушила запасной вариант и запрос падал с
+   * Missing required headers. Ключи Headers уже в нижнем регистре.
+   */
+  const headers = Object.fromEntries(request.headers);
 
   let event: { type?: string; data?: { email_id?: string } };
   try {
-    event = new Webhook(secret).verify(payload, {
-      "svix-id": request.headers.get("svix-id") ?? "",
-      "svix-timestamp": request.headers.get("svix-timestamp") ?? "",
-      "svix-signature": request.headers.get("svix-signature") ?? "",
-    }) as unknown as typeof event;
+    // verify ничего не возвращает, только бросает исключение при расхождении,
+    // поэтому событие разбираем сами из уже доверенного тела.
+    new Webhook(secret).verify(payload, headers);
+    event = JSON.parse(payload);
   } catch (error) {
-    console.error("Inbound email: подпись вебхука не прошла проверку", error);
+    const signatureHeaders = Object.keys(headers).filter((name) =>
+      /^(svix|webhook)-/.test(name),
+    );
+    console.error(
+      `Inbound email: подпись вебхука не прошла проверку, заголовки подписи: ${
+        signatureHeaders.join(", ") || "отсутствуют"
+      }`,
+      error,
+    );
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
