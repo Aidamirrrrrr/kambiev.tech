@@ -2,18 +2,28 @@
 
 /** Секция контактов: форма уходит в Telegram, рядом прямые контакты. */
 
-import { AnimatePresence, motion, useInView } from "framer-motion";
-import { Send } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { Check } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
 import { FloatingField } from "@/components/form/floating-field";
 import { FloatingTextarea } from "@/components/form/floating-textarea";
 import { LocaleTransition } from "@/components/locale-transition";
 import { MagneticLink } from "@/components/ui/magnetic-link";
+import {
+  detectContactKind,
+  formatPhone,
+  isContactValid,
+} from "@/lib/contact-field";
 import { useI18n } from "@/lib/i18n";
 import { site } from "@/lib/site";
 import { socialLinks } from "@/lib/social";
 
 const EMAIL = site.email;
+
+/** Маска включается только когда человек явно набирает номер. */
+function maskContact(value: string): string {
+  return detectContactKind(value) === "phone" ? formatPhone(value) : value;
+}
 
 function ContactForm({
   isInView,
@@ -31,15 +41,27 @@ function ContactForm({
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [formKey, setFormKey] = useState(0);
+  const [showErrors, setShowErrors] = useState(false);
+
+  // Ошибки считаются от текущих значений, а поле само решает, показывать ли
+  // их: пока в него не заходили, ругаться не на что.
+  const errors = {
+    name: formData.name.trim() ? undefined : t.contact.errName,
+    contact: !formData.contact.trim()
+      ? t.contact.errContact
+      : isContactValid(formData.contact)
+        ? undefined
+        : t.contact.errContactInvalid,
+    message: formData.message.trim() ? undefined : t.contact.errMessage,
+  };
+  const hasErrors = Object.values(errors).some(Boolean);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (
-      !formData.name.trim() ||
-      formData.contact.trim().length < 3 ||
-      !formData.message.trim()
-    ) {
+
+    // Раньше форма молча делала return, и нажатие выглядело как поломка.
+    if (hasErrors) {
+      setShowErrors(true);
       return;
     }
 
@@ -52,123 +74,137 @@ function ContactForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, locale }),
       });
-
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error(String(res.status));
 
       setSubmitted(true);
       setFormData({ name: "", contact: "", message: "" });
-      setFormKey((k) => k + 1);
-      setTimeout(() => setSubmitted(false), 4000);
+      setShowErrors(false);
     } catch {
       setError(true);
-      setTimeout(() => setError(false), 4000);
     } finally {
       setLoading(false);
     }
   }
 
+  /*
+   * Подтверждение заменяет форму и никуда не исчезает само. Раньше оно было
+   * надписью на кнопке того же цвета, что и обычная, и гасло через четыре
+   * секунды, поэтому отправка выглядела так, будто ничего не произошло.
+   */
+  if (submitted) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        role="status"
+        className="rounded-2xl border border-accent/30 bg-accent/5 p-8"
+      >
+        <div className="flex items-start gap-4">
+          <span
+            aria-hidden
+            className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent"
+          >
+            <Check className="h-4 w-4 text-page" strokeWidth={3} />
+          </span>
+          <div>
+            <p className="font-semibold text-fg text-lg tracking-tight">
+              <LocaleTransition className="inline">
+                {t.contact.sentTitle}
+              </LocaleTransition>
+            </p>
+            <p className="mt-1 text-base text-fg-muted leading-relaxed">
+              <LocaleTransition className="inline">
+                {t.contact.sentText}
+              </LocaleTransition>
+            </p>
+            <button
+              type="button"
+              onClick={() => setSubmitted(false)}
+              className="mt-4 font-medium text-accent text-base transition-colors hover:text-accent-strong"
+            >
+              <LocaleTransition className="inline">
+                {t.contact.sendMore}
+              </LocaleTransition>
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.form
       onSubmit={handleSubmit}
+      noValidate
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
       transition={{ duration: 0.8, delay: 0.2 }}
-      className="flex flex-col gap-8"
+      className="flex flex-col gap-6"
     >
-      <div key={formKey} className="flex flex-col gap-8">
-        <div className="grid gap-8 sm:grid-cols-2">
-          <FloatingField
-            label={t.contact.nameLabel}
-            value={formData.name}
-            onChange={(val) => setFormData({ ...formData, name: val })}
-            index={0}
-            isInView={isInView}
-          />
-          <FloatingField
-            label={t.contact.contactLabel}
-            value={formData.contact}
-            onChange={(val) => setFormData({ ...formData, contact: val })}
-            index={1}
-            isInView={isInView}
-          />
-        </div>
-        <FloatingTextarea
-          label={t.contact.messageLabel}
-          value={formData.message}
-          onChange={(val) => setFormData({ ...formData, message: val })}
+      <div className="grid gap-6 sm:grid-cols-2">
+        <FloatingField
+          label={t.contact.nameLabel}
+          value={formData.name}
+          onChange={(val) => setFormData({ ...formData, name: val })}
+          error={showErrors ? errors.name : undefined}
+          autoComplete="name"
+          index={0}
+          isInView={isInView}
+        />
+        <FloatingField
+          label={t.contact.contactLabel}
+          value={formData.contact}
+          onChange={(val) =>
+            setFormData({ ...formData, contact: maskContact(val) })
+          }
+          error={showErrors ? errors.contact : undefined}
+          hint={t.contact.contactHint}
+          inputMode={
+            detectContactKind(formData.contact) === "phone" ? "tel" : "email"
+          }
+          index={1}
           isInView={isInView}
         />
       </div>
+
+      <FloatingTextarea
+        label={t.contact.messageLabel}
+        value={formData.message}
+        onChange={(val) => setFormData({ ...formData, message: val })}
+        error={showErrors ? errors.message : undefined}
+        isInView={isInView}
+      />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.44 }}
-        className="pt-2"
       >
-        <motion.button
+        <button
           type="submit"
           disabled={loading}
-          whileHover={{ scale: loading ? 1 : 1.02 }}
-          whileTap={{ scale: loading ? 1 : 0.98 }}
-          className={`group inline-flex items-center gap-3 rounded-full border px-8 py-3.5 text-sm font-semibold transition-all duration-300 disabled:cursor-not-allowed ${
-            submitted
-              ? "border-accent bg-accent text-page"
-              : error
-                ? "border-red-600 bg-red-600 text-page"
-                : "border-accent bg-accent text-page hover:bg-accent-strong disabled:opacity-70"
-          }`}
+          className="inline-flex items-center justify-center gap-2.5 rounded-full bg-accent px-8 py-3.5 font-medium text-base text-page transition-colors duration-300 hover:bg-accent-strong disabled:opacity-70"
         >
-          <AnimatePresence mode="wait">
-            {submitted ? (
-              <motion.span
-                key="sent"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                {t.contact.sent}
-              </motion.span>
-            ) : error ? (
-              <motion.span
-                key="error"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="text-page"
-              >
-                {t.contact.error}
-              </motion.span>
-            ) : loading ? (
-              <motion.span
-                key="loading"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="inline-flex items-center gap-2"
-              >
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-page border-t-transparent" />
-                {t.contact.sending}
-              </motion.span>
-            ) : (
-              <motion.span
-                key="send"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="inline-flex items-center gap-3"
-              >
-                {t.contact.send}
-                <Send className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
+          {loading && (
+            <span
+              aria-hidden
+              className="h-4 w-4 animate-spin rounded-full border-2 border-page border-t-transparent"
+            />
+          )}
+          <LocaleTransition className="inline">
+            {loading ? t.contact.sending : t.contact.send}
+          </LocaleTransition>
+        </button>
 
-        {/*
-          Обёртка смены языка рендерится как inline-block, поэтому оборачивать
-          в неё сам абзац нельзя: он встаёт в строку рядом с кнопкой.
-          Блочный <p> снаружи, анимация языка — только вокруг текста.
-        */}
+        {error && (
+          <p role="alert" className="mt-4 text-base text-red-600">
+            <LocaleTransition className="inline">
+              {t.contact.error}
+            </LocaleTransition>
+          </p>
+        )}
+
         <p className="mt-6 max-w-md text-fg-dim text-xs leading-relaxed">
           <LocaleTransition className="inline">{t.ui.consent}</LocaleTransition>{" "}
           <a

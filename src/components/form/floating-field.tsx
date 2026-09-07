@@ -2,60 +2,71 @@
 
 /** Поле ввода с плавающей подписью. */
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useId, useState } from "react";
 
 export function FloatingField({
   label,
   type = "text",
-  required = true,
   value,
   onChange,
+  error,
+  hint,
+  inputMode,
+  autoComplete,
+  transform,
   index,
   isInView,
 }: {
   label: string;
   type?: string;
-  required?: boolean;
   value: string;
   onChange: (val: string) => void;
+  /** Текст ошибки. Показывается только после того, как поле покидали. */
+  error?: string;
+  hint?: string;
+  inputMode?: "text" | "email" | "tel";
+  autoComplete?: string;
+  /** Маска: приводит ввод к нужному виду прямо во время набора. */
+  transform?: (val: string) => string;
   index: number;
   isInView: boolean;
 }) {
   const fieldId = useId();
-  const errorId = `${fieldId}-error`;
+  const messageId = `${fieldId}-message`;
   const [focused, setFocused] = useState(false);
-  const [touched, setTouched] = useState(false);
+
   const isActive = focused || value.length > 0;
-  const isEmpty = touched && required && value.trim().length === 0;
-  const isInvalidEmail =
-    touched &&
-    type === "email" &&
-    value.length > 0 &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  // Показывать или нет решает форма: она знает, была ли попытка отправки.
+  const showError = Boolean(error);
+  const message = showError ? error : hint;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 0.2 + index * 0.08 }}
-      className="group relative"
+      className="group relative pb-6"
     >
       <input
         id={fieldId}
         type={type}
-        required={required}
-        aria-invalid={isEmpty || isInvalidEmail}
-        aria-describedby={isEmpty ? errorId : undefined}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        aria-invalid={showError}
+        aria-describedby={message ? messageId : undefined}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) =>
+          onChange(transform ? transform(e.target.value) : e.target.value)
+        }
         onFocus={() => setFocused(true)}
-        onBlur={() => {
-          setFocused(false);
-          setTouched(true);
-        }}
-        className={`peer w-full border-b-2 bg-transparent pb-2 pt-6 text-sm text-fg outline-none transition-all duration-300 ${
-          isEmpty || isInvalidEmail
+        onBlur={() => setFocused(false)}
+        /*
+         * 16px обязательны: Safari на iOS увеличивает страницу при фокусе
+         * на поле с меньшим шрифтом, и вернуть масштаб потом нечем.
+         */
+        className={`peer w-full border-b-2 bg-transparent pt-6 pb-2 text-base text-fg outline-none transition-colors duration-300 ${
+          showError
             ? "border-red-600"
             : focused
               ? "border-accent"
@@ -65,50 +76,28 @@ export function FloatingField({
       <label
         htmlFor={fieldId}
         className={`pointer-events-none absolute left-0 transition-all duration-300 ${
-          isActive ? "top-0 text-[11px] tracking-wider" : "top-5 text-sm"
-        } ${
-          isEmpty || isInvalidEmail
-            ? "text-red-600"
-            : focused
-              ? "text-fg"
-              : "text-fg-muted"
-        }`}
+          isActive ? "top-0 text-xs tracking-wide" : "top-6 text-base"
+        } ${showError ? "text-red-600" : focused ? "text-fg" : "text-fg-muted"}`}
       >
         {label}
       </label>
-      <motion.span
-        className="absolute bottom-0 left-0 h-0.5 bg-fg"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: focused ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        style={{ originX: 0 }}
-      />
-      <AnimatePresence>
-        {isEmpty && (
-          <motion.span
-            id={errorId}
-            role="alert"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="-bottom-5 absolute left-0 text-[11px] text-red-600"
-          >
-            {label}
-          </motion.span>
-        )}
-        {isInvalidEmail && (
-          <motion.span
-            id={errorId}
-            role="alert"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="-bottom-5 absolute left-0 text-[11px] text-red-600"
-          >
-            {label}
-          </motion.span>
-        )}
-      </AnimatePresence>
+
+      {/*
+        Подсказка и ошибка живут в одном узле. Раньше они подменялись через
+        AnimatePresence с mode="wait", и переход подсказка -> ошибка залипал:
+        поле оставалось с подсказкой, хотя ошибка уже была передана.
+      */}
+      {message && (
+        <p
+          id={messageId}
+          role={showError ? "alert" : undefined}
+          className={`absolute bottom-0 left-0 text-xs leading-snug transition-colors duration-200 ${
+            showError ? "text-red-600" : "text-fg-dim"
+          }`}
+        >
+          {message}
+        </p>
+      )}
     </motion.div>
   );
 }

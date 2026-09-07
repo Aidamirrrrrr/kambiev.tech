@@ -7,46 +7,44 @@ import { useId, useState } from "react";
 
 export function FloatingTextarea({
   label,
-  required = true,
   value,
   onChange,
+  error,
   isInView,
 }: {
   label: string;
-  required?: boolean;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
   isInView: boolean;
 }) {
   const fieldId = useId();
   const errorId = `${fieldId}-error`;
   const [focused, setFocused] = useState(false);
-  const [touched, setTouched] = useState(false);
+
   const isActive = focused || value.length > 0;
-  const isEmpty = touched && required && value.trim().length === 0;
+  // Показывать или нет решает форма: она знает, была ли попытка отправки.
+  const showError = Boolean(error);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 0.36 }}
-      className="group relative"
+      className="group relative pb-6"
     >
       <textarea
         id={fieldId}
-        required={required}
-        aria-invalid={isEmpty}
-        aria-describedby={isEmpty ? errorId : undefined}
+        rows={4}
+        aria-invalid={showError}
+        aria-describedby={showError ? errorId : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
-        onBlur={() => {
-          setFocused(false);
-          setTouched(true);
-        }}
-        rows={4}
-        className={`peer w-full resize-none border-b-2 bg-transparent pb-2 pt-6 text-sm text-fg outline-none transition-all duration-300 ${
-          isEmpty
+        onBlur={() => setFocused(false)}
+        /* 16px: иначе Safari на iOS увеличивает страницу при фокусе. */
+        className={`peer w-full resize-none border-b-2 bg-transparent pt-6 pb-2 text-base text-fg outline-none transition-colors duration-300 ${
+          showError
             ? "border-red-600"
             : focused
               ? "border-accent"
@@ -56,30 +54,25 @@ export function FloatingTextarea({
       <label
         htmlFor={fieldId}
         className={`pointer-events-none absolute left-0 transition-all duration-300 ${
-          isActive ? "top-0 text-[11px] tracking-wider" : "top-5 text-sm"
-        } ${isEmpty ? "text-red-600" : focused ? "text-fg" : "text-fg-muted"}`}
+          isActive ? "top-0 text-xs tracking-wide" : "top-6 text-base"
+        } ${showError ? "text-red-600" : focused ? "text-fg" : "text-fg-muted"}`}
       >
         {label}
       </label>
-      <motion.span
-        className="absolute bottom-0 left-0 h-0.5 bg-fg"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: focused ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        style={{ originX: 0 }}
-      />
+
       <AnimatePresence>
-        {isEmpty && (
-          <motion.span
+        {showError && (
+          <motion.p
             id={errorId}
             role="alert"
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="-bottom-5 absolute left-0 text-[11px] text-red-600"
+            transition={{ duration: 0.2 }}
+            className="absolute bottom-0 left-0 text-red-600 text-xs leading-snug"
           >
-            {label}
-          </motion.span>
+            {error}
+          </motion.p>
         )}
       </AnimatePresence>
     </motion.div>
