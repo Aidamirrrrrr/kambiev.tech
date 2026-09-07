@@ -12,12 +12,6 @@ export function CtaBanner() {
   const isInView = useInView(sectionRef, { once: true, margin: "-150px" });
   const { t } = useI18n();
 
-  const stats = [
-    { value: t.ctaBanner.stat1val, label: t.ctaBanner.stat1label },
-    { value: t.ctaBanner.stat2val, label: t.ctaBanner.stat2label },
-    { value: t.ctaBanner.stat3val, label: t.ctaBanner.stat3label },
-  ];
-
   return (
     <section ref={sectionRef} className="bg-page py-24 text-center sm:py-32">
       <motion.div
@@ -47,29 +41,16 @@ export function CtaBanner() {
           </Actions>
         </div>
 
-        <dl className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
-          {stats.map((stat) => (
-            <div key={stat.label}>
-              <dt className="sr-only">
-                <LocaleTransition className="inline">
-                  {stat.label}
-                </LocaleTransition>
-              </dt>
-              <dd>
-                <span className="block font-semibold text-3xl text-fg tracking-tight">
-                  <LocaleTransition className="inline">
-                    {stat.value}
-                  </LocaleTransition>
-                </span>
-                <LocaleTransition>
-                  <span className="mt-1 block text-fg-dim text-sm">
-                    {stat.label}
-                  </span>
-                </LocaleTransition>
-              </dd>
-            </div>
-          ))}
-        </dl>
+        {/*
+          Раньше тут стояли три крупные цифры, первой из которых было обещание
+          ответить за сутки. Без него осталось два факта, и ряд статистики под
+          них уже не нужен: тихая строка, как в хиро, честнее по весу.
+        */}
+        <p className="mt-12 text-fg-dim text-sm">
+          <LocaleTransition className="inline">
+            {t.ctaBanner.meta}
+          </LocaleTransition>
+        </p>
       </motion.div>
     </section>
   );

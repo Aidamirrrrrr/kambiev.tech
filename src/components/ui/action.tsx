@@ -9,6 +9,13 @@ const variants = {
   outline: "border border-line-strong text-fg hover:border-fg hover:bg-page",
 } as const;
 
+export type ActionVariant = keyof typeof variants;
+
+/** Те же классы для случаев, где нужна кнопка, а не ссылка. */
+export function actionClass(variant: ActionVariant = "solid") {
+  return `${base} ${variants[variant]}`;
+}
+
 export function Action({
   href,
   variant = "solid",
@@ -16,7 +23,7 @@ export function Action({
   children,
 }: {
   href: string;
-  variant?: keyof typeof variants;
+  variant?: ActionVariant;
   external?: boolean;
   children: ReactNode;
 }) {
@@ -24,7 +31,7 @@ export function Action({
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-      className={`${base} ${variants[variant]}`}
+      className={actionClass(variant)}
     >
       <LocaleTransition className="inline">{children}</LocaleTransition>
     </a>

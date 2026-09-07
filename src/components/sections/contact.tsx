@@ -1,11 +1,11 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { Check } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
 import { FloatingField } from "@/components/form/floating-field";
 import { FloatingTextarea } from "@/components/form/floating-textarea";
 import { LocaleTransition } from "@/components/locale-transition";
+import { actionClass } from "@/components/ui/action";
 import { MagneticLink } from "@/components/ui/magnetic-link";
 import {
   detectContactKind,
@@ -87,40 +87,38 @@ function ContactForm({
   if (submitted) {
     return (
       <motion.output
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="block rounded-2xl border border-accent/30 bg-accent/5 p-8"
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="block border-line border-t pt-12"
       >
-        <div className="flex items-start gap-4">
-          <span
-            aria-hidden
-            className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent"
-          >
-            <Check className="h-4 w-4 text-page" strokeWidth={3} />
-          </span>
-          <div>
-            <p className="font-semibold text-fg text-lg tracking-tight">
-              <LocaleTransition className="inline">
-                {t.contact.sentTitle}
-              </LocaleTransition>
-            </p>
-            <p className="mt-1 text-base text-fg-muted leading-relaxed">
-              <LocaleTransition className="inline">
-                {t.contact.sentText}
-              </LocaleTransition>
-            </p>
-            <button
-              type="button"
-              onClick={() => setSubmitted(false)}
-              className="mt-4 font-medium text-accent text-base transition-colors hover:text-accent-strong"
-            >
-              <LocaleTransition className="inline">
-                {t.contact.sendMore}
-              </LocaleTransition>
-            </button>
-          </div>
-        </div>
+        <p className="font-medium text-accent text-sm">
+          <LocaleTransition className="inline">
+            {t.contact.sentLabel}
+          </LocaleTransition>
+        </p>
+
+        <h3 className="mt-3 font-semibold text-3xl text-fg tracking-tight sm:text-4xl">
+          <LocaleTransition className="inline">
+            {t.contact.sentTitle}
+          </LocaleTransition>
+        </h3>
+
+        <p className="mt-4 max-w-xl text-fg-muted text-lg leading-relaxed">
+          <LocaleTransition className="inline">
+            {t.contact.sentText}
+          </LocaleTransition>
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setSubmitted(false)}
+          className={`mt-8 ${actionClass("outline")}`}
+        >
+          <LocaleTransition className="inline">
+            {t.contact.sendMore}
+          </LocaleTransition>
+        </button>
       </motion.output>
     );
   }
