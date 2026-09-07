@@ -27,8 +27,10 @@ export default async function PrivacyPage() {
 
   return (
     <main className="bg-page">
-      <article className="mx-auto max-w-3xl px-6 pt-32 pb-24">
-        <h1 className="font-semibold text-4xl text-fg tracking-tight sm:text-5xl">
+      <article className="mx-auto max-w-3xl px-6 pt-14 pb-20 sm:pt-24 sm:pb-24">
+        {/* «конфиденциальности» одним словом не влезает в 375px при 36px:
+            на узком экране кегль меньше, hyphens страхует от переполнения. */}
+        <h1 className="hyphens-auto font-semibold text-3xl text-fg tracking-tight sm:text-5xl">
           {t.title}
         </h1>
         <p className="mt-6 text-fg-muted text-lg leading-relaxed">{t.intro}</p>

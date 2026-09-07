@@ -72,7 +72,6 @@ export function ProjectBand({
     more: string;
     less: string;
     whatInside: string;
-    isPrivate: string;
   };
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -165,14 +164,7 @@ export function ProjectBand({
                 ))}
               </div>
 
-              <p className="mt-6 text-fg-dim text-sm">
-                <span aria-hidden className="mr-2">
-                  {project.year}
-                </span>
-                <LocaleTransition className="inline">
-                  {labels.isPrivate}
-                </LocaleTransition>
-              </p>
+              <p className="mt-6 text-fg-dim text-sm">{project.year}</p>
             </div>
           </Disclosure>
         </div>

@@ -129,7 +129,6 @@ export const en: Dictionary = {
     title: "What I've",
     titleAccent: "built",
     cta: "Discuss a project",
-    private: "Private repository",
     moreTitle: "Other projects",
     p1facts: [
       "An API of five domain modules",

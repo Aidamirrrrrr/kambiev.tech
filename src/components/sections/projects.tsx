@@ -32,7 +32,6 @@ export function Projects() {
     more: t.ui.more,
     less: t.ui.less,
     whatInside: t.ui.whatInside,
-    isPrivate: t.projects.private,
   };
 
   return (

@@ -125,7 +125,6 @@ export const ru = {
     title: "Что я",
     titleAccent: "построил",
     cta: "Обсудить задачу",
-    private: "Приватный репозиторий",
     moreTitle: "Другие проекты",
     p1facts: [
       "API из пяти доменных модулей",
