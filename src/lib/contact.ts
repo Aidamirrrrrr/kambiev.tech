@@ -1,6 +1,6 @@
 /** Проверка и форматирование заявки. Вынесено из маршрута ради тестов. */
 
-import { escapeHtml } from "./telegram";
+import { formatNotification } from "./telegram";
 
 const LIMITS = { name: 100, contact: 200, message: 3000 } as const;
 const MIN_CONTACT_LENGTH = 3;
@@ -52,13 +52,12 @@ export function formatMessage({
   locale,
 }: Payload): string {
   const ru = locale === "ru";
-  return [
-    `<b>${ru ? "Новая заявка с сайта" : "New inquiry from the website"}</b>`,
-    "",
-    `<b>${ru ? "Имя" : "Name"}:</b> ${escapeHtml(name)}`,
-    `<b>${ru ? "Контакт" : "Contact"}:</b> ${escapeHtml(contact)}`,
-    "",
-    `<b>${ru ? "Сообщение" : "Message"}:</b>`,
-    escapeHtml(message),
-  ].join("\n");
+  return formatNotification({
+    title: ru ? "Заявка с сайта" : "Inquiry from the website",
+    fields: [
+      [ru ? "Имя" : "Name", name],
+      [ru ? "Контакт" : "Contact", contact],
+    ],
+    body: message,
+  });
 }

@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { Webhook } from "svix";
 import { htmlToText } from "@/lib/email";
-import { escapeHtml, sendMessage, truncate } from "@/lib/telegram";
+import { formatNotification, sendMessage, truncate } from "@/lib/telegram";
 
 /** Сколько символов тела письма помещаем в сообщение, оставляя место под шапку. */
 const MAX_BODY = 3000;
@@ -80,24 +80,22 @@ export async function POST(request: Request) {
     const body =
       email.text?.trim() || (email.html ? htmlToText(email.html) : "");
 
-    const lines = [
-      "📬 <b>Новое письмо</b>",
-      "",
-      `<b>От:</b> ${escapeHtml(email.from)}`,
-      `<b>Кому:</b> ${escapeHtml(email.received_for.join(", ") || email.to.join(", "))}`,
-      `<b>Тема:</b> ${escapeHtml(email.subject || "(без темы)")}`,
-    ];
+    const attachments = email.attachments
+      .map((a) => `${a.filename ?? "файл"}, ${Math.round(a.size / 1024)} КБ`)
+      .join(" · ");
 
-    if (email.attachments.length > 0) {
-      const names = email.attachments
-        .map((a) => `${a.filename ?? "файл"} (${Math.round(a.size / 1024)} КБ)`)
-        .join(", ");
-      lines.push(`<b>Вложения:</b> ${escapeHtml(names)}`);
-    }
+    const text = formatNotification({
+      title: "Письмо на почту",
+      fields: [
+        ["Кому", email.received_for.join(", ") || email.to.join(", ")],
+        ["От", email.from],
+        ["Тема", email.subject || "без темы"],
+        ["Вложения", attachments || undefined],
+      ],
+      body: truncate(body, MAX_BODY) || "Письмо без текста.",
+    });
 
-    lines.push("", escapeHtml(truncate(body || "(пустое письмо)", MAX_BODY)));
-
-    await sendMessage(token, chatId, lines.join("\n"));
+    await sendMessage(token, chatId, text);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

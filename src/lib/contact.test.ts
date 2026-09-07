@@ -53,7 +53,16 @@ describe("formatMessage", () => {
   });
 
   it("переключает язык шапки", () => {
-    expect(formatMessage(valid)).toContain("Новая заявка");
-    expect(formatMessage({ ...valid, locale: "en" })).toContain("New inquiry");
+    expect(formatMessage(valid)).toContain("<b>ЗАЯВКА С САЙТА</b>");
+    expect(formatMessage({ ...valid, locale: "en" })).toContain(
+      "<b>INQUIRY FROM THE WEBSITE</b>",
+    );
+  });
+
+  // Текст автора отделён цитатой, иначе он может притвориться нашей строкой.
+  it("выносит сообщение в цитату", () => {
+    expect(formatMessage(valid)).toContain(
+      "<blockquote expandable>Привет</blockquote>",
+    );
   });
 });
