@@ -11,6 +11,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LocaleTransition } from "@/components/locale-transition";
+import { Logo } from "@/components/ui/logo";
 import { type Locale, useI18n } from "@/lib/i18n";
 
 const localeOptions: { value: Locale; label: string }[] = [
@@ -92,9 +93,10 @@ export function Navigation() {
           {/* biome-ignore lint/a11y/useValidAnchor: это навигация к якорю, onClick лишь закрывает меню */}
           <a
             href="#top"
-            className="font-medium text-base text-fg tracking-tight transition-opacity duration-300 hover:opacity-60"
+            className="inline-flex items-center gap-2.5 font-medium text-base text-fg tracking-tight transition-opacity duration-300 hover:opacity-60"
             onClick={() => setMobileOpen(false)}
           >
+            <Logo className="h-7 w-7 shrink-0" />
             <LocaleTransition className="inline">
               {t.nav.wordmark}
             </LocaleTransition>

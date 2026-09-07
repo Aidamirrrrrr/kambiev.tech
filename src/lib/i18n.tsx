@@ -26,6 +26,9 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | null>(null);
 
 function setCookie(name: string, value: string) {
+  // Cookie Store API нет в Safari, а язык нужно сохранить во всех браузерах.
+  // Значение не пользовательское: это одна из двух строк, "ru" или "en".
+  // biome-ignore lint/suspicious/noDocumentCookie: см. комментарий выше
   document.cookie = `${name}=${value};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
 }
 

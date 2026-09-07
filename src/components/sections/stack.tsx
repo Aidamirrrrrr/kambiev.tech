@@ -39,7 +39,6 @@ function CategoryRow({ items, label }: { items: TechItem[]; label: string }) {
   );
 }
 
-/** Секция технологического стека. */
 export function Stack() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });

@@ -47,6 +47,8 @@ src/
 │   ├── manifest.ts          веб-манифест
 │   ├── robots.ts            robots.txt
 │   └── sitemap.ts           sitemap.xml
+│   ├── error.tsx            граница ошибок
+│   ├── not-found.tsx        страница 404
 ├── components/
 │   ├── sections/            секции страницы
 │   ├── form/                поля формы с плавающими подписями
@@ -56,6 +58,7 @@ src/
 │   ├── custom-cursor        след за системным курсором
 │   ├── locale-transition    анимация смены языка
 │   └── smooth-scroll        Lenis и обработка якорей
+├── data/                    статические данные (стек)
 └── lib/
     ├── site.ts              адреса и контакты, единственный источник
     ├── social.ts            внешние профили
@@ -78,8 +81,15 @@ pnpm dev
 ```bash
 pnpm lint        # biome
 pnpm typecheck   # tsc --noEmit
+pnpm test        # vitest
 pnpm build
 ```
+
+Те же четыре шага гоняет GitHub Actions на каждый пуш и pull request.
+
+Тестами покрыта логика, где ошибка стоит дорого: проверка и экранирование
+заявки с формы, разбор `Accept-Language`, приведение HTML-письма к тексту
+и целостность данных (совпадение словарей, ключи категорий стека).
 
 ## Переменные окружения
 

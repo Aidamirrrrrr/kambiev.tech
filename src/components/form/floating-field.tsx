@@ -112,5 +112,3 @@ export function FloatingField({
     </motion.div>
   );
 }
-
-/** Поле текста с плавающим лейблом. */

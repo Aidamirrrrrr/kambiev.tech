@@ -1,4 +1,7 @@
+# esbuild приходит из vitest и требует postinstall. Без явного разрешения
+# pnpm валит любую команду, включая шаги CI.
 allowBuilds:
+  esbuild: true
   msw: false
   sharp: false
 ignoredBuiltDependencies:

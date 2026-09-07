@@ -8,27 +8,13 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { Webhook } from "svix";
+import { htmlToText } from "@/lib/email";
 import { escapeHtml, sendMessage, truncate } from "@/lib/telegram";
 
 /** Сколько символов тела письма помещаем в сообщение, оставляя место под шапку. */
 const MAX_BODY = 3000;
 
 export const dynamic = "force-dynamic";
-
-/** Приводит HTML-письмо к тексту: без разметки, без лишних пустых строк. */
-function htmlToText(html: string) {
-  return html
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|tr|h[1-6])>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 export async function POST(request: Request) {
   const secret = process.env.RESEND_WEBHOOK_SECRET;

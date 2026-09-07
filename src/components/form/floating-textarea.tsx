@@ -85,5 +85,3 @@ export function FloatingTextarea({
     </motion.div>
   );
 }
-
-/** Форма обратной связи — заявка уходит в Telegram через API-маршрут. */

@@ -226,6 +226,11 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
+        {/*
+          JSON-LD нельзя вставить текстовым узлом: React экранировал бы кавычки
+          и разметка перестала бы читаться. Содержимое собирается здесь же
+          из констант, пользовательского ввода в нём нет.
+        */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
