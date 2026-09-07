@@ -1,5 +1,6 @@
 import { Webhook } from "svix";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resetAlertThrottle } from "@/lib/alert";
 
 /*
  * Секрет Standard Webhooks: префикс whsec_ и дальше base64. Значение
@@ -32,6 +33,19 @@ vi.mock("resend", () => ({
   },
 }));
 
+/*
+ * Пересылка письма и алерт о сбое уходят одним и тем же sendMessage,
+ * поэтому разбираем вызовы по заголовку сообщения.
+ */
+function messagesWith(marker: string) {
+  return sendMessage.mock.calls.filter((call) =>
+    String(call[2]).includes(marker),
+  );
+}
+
+const forwarded = () => messagesWith("ПИСЬМО НА ПОЧТУ");
+const alerts = () => messagesWith("СБОЙ НА САЙТЕ");
+
 function body(type = "email.received") {
   return JSON.stringify({ type, data: { email_id: EMAIL_ID } });
 }
@@ -61,6 +75,7 @@ async function post(headers: Record<string, string>, payload = body()) {
 
 describe("POST /api/inbound-email", () => {
   beforeEach(() => {
+    resetAlertThrottle();
     vi.stubEnv("RESEND_WEBHOOK_SECRET", SECRET);
     vi.stubEnv("RESEND_API_KEY", "re_test");
     vi.stubEnv("MAIL_BOT_TOKEN", "test-token");
@@ -91,16 +106,19 @@ describe("POST /api/inbound-email", () => {
       expect(res.status).toBe(200);
       expect(getReceiving).toHaveBeenCalledWith(EMAIL_ID);
 
-      expect(sendMessage).toHaveBeenCalledTimes(1);
-      const text = String(sendMessage.mock.calls[0]?.[2]);
+      expect(forwarded()).toHaveLength(1);
+      const text = String(forwarded()[0]?.[2]);
       expect(text).toContain("dev.aidamir@gmail.com");
       expect(text).toContain("Test");
       expect(text).toContain("Проверка связи");
     },
   );
 
-  it("отклоняет запрос без заголовков подписи", async () => {
+  // Голые POST от сканеров ходят по любому публичному адресу: они не повод
+  // для уведомления, иначе алерты быстро перестают читать.
+  it("отклоняет запрос без заголовков подписи и молчит", async () => {
     const res = await post({});
+
     expect(res.status).toBe(401);
     expect(sendMessage).not.toHaveBeenCalled();
   });
@@ -111,8 +129,11 @@ describe("POST /api/inbound-email", () => {
     headers["webhook-signature"] = "v1,ZG9uZQ==";
 
     const res = await post(headers, payload);
+
     expect(res.status).toBe(401);
-    expect(sendMessage).not.toHaveBeenCalled();
+    expect(forwarded()).toHaveLength(0);
+    // Заголовки пришли, значит это похоже на живую доставку, а не на скан.
+    expect(alerts()).toHaveLength(1);
   });
 
   it("на посторонние события отвечает успехом и молчит", async () => {
@@ -123,13 +144,14 @@ describe("POST /api/inbound-email", () => {
     expect(sendMessage).not.toHaveBeenCalled();
   });
 
-  it("просит повтор, если письмо не удалось забрать", async () => {
+  it("просит повтор и предупреждает, если письмо не удалось забрать", async () => {
     getReceiving.mockResolvedValue({ data: null, error: { message: "нет" } });
 
     const payload = body();
     const res = await post(sign(payload, "webhook"), payload);
 
     expect(res.status).toBe(500);
-    expect(sendMessage).not.toHaveBeenCalled();
+    expect(forwarded()).toHaveLength(0);
+    expect(String(alerts()[0]?.[2])).toContain(EMAIL_ID);
   });
 });

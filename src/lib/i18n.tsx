@@ -1,7 +1,5 @@
 "use client";
 
-/** Провайдер интернационализации (RU/EN) с контекстом и словарями. */
-
 import {
   createContext,
   type ReactNode,

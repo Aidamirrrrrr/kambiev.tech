@@ -1,5 +1,3 @@
-/** Корневой layout: метаданные, шрифты и структурированные данные. */
-
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
@@ -116,9 +114,8 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const lang = cookieStore.get("locale")?.value === "en" ? "en" : "ru";
 
-  // Структурированные данные. Person описывает человека, ItemList — работы,
-  // WebSite — сам сайт. Всё в одном графе, чтобы поисковик связал сущности
-  // между собой, а не читал три независимых куска.
+  // Всё в одном графе, чтобы поисковик связал сущности между собой,
+  // а не читал три независимых куска.
   const person = {
     "@type": "Person",
     "@id": `${SITE}/#person`,

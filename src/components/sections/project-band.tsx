@@ -1,9 +1,6 @@
 "use client";
 
-/**
- * Полоса одного проекта: категория, название, одна понятная фраза,
- * снимок продукта в рамке устройства, три факта и раскрытие с деталями.
- */
+/** Полоса одного проекта: снимок, три факта и раскрытие с деталями. */
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
@@ -78,25 +75,32 @@ export function ProjectBand({
   const inView = useInView(ref, { once: true, margin: "-12%" });
   const onGray = index % 2 === 1;
 
-  // Кадр продукта живёт чуть медленнее страницы и дорастает до полного размера,
-  // пока полоса проходит через экран. Движение намеренно маленькое: у Apple
-  // параллакс заметен телом, а не глазом.
+  /*
+   * Три слоя идут с разной скоростью, поэтому полоса читается глубиной.
+   * Смещения в пикселях, а не в процентах: высота кадра гуляет от 500 до 1172
+   * пикселей, и на процентах большие полосы наезжали бы на список фактов.
+   */
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
-  const mediaY = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
-  const mediaScale = useTransform(scrollYProgress, [0, 0.45], [0.94, 1]);
+  const headY = useTransform(scrollYProgress, [0, 1], [24, -24]);
+  const mediaY = useTransform(scrollYProgress, [0, 1], [72, -72]);
+  const mediaScale = useTransform(scrollYProgress, [0, 0.4], [0.92, 1]);
+  const factsY = useTransform(scrollYProgress, [0, 1], [16, -16]);
 
   return (
     <div ref={ref} className={onGray ? "bg-surface" : "bg-page"}>
       <motion.article
-        initial={{ opacity: 0, y: 32 }}
+        initial={{ opacity: 0, y: 56 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8, ease }}
+        transition={{ duration: 1, ease }}
         className="mx-auto max-w-6xl px-6 py-24 sm:py-32"
       >
-        <div className="mx-auto max-w-4xl text-center">
+        <motion.div
+          style={{ y: headY }}
+          className="mx-auto max-w-4xl text-center"
+        >
           <p className="font-medium text-accent text-sm">
             <LocaleTransition className="inline">
               {project.category}
@@ -110,23 +114,22 @@ export function ProjectBand({
           <p className="mx-auto mt-5 max-w-3xl text-fg-muted text-xl leading-relaxed">
             <LocaleTransition>{project.short}</LocaleTransition>
           </p>
-        </div>
+        </motion.div>
 
         {project.media.kind !== "none" && (
           <motion.div
             style={{ y: mediaY, scale: mediaScale }}
-            className="mt-14 origin-bottom"
+            className="mt-20 origin-bottom sm:mt-24"
           >
             <Media media={project.media} title={project.title} />
           </motion.div>
         )}
 
-        {/*
-          Просто факты, а не пары «термин-определение», поэтому список, а не dl.
-          Раньше здесь был невидимый dt с названием проекта: он ничего не давал
-          скринридеру и лез в текст при выделении.
-        */}
-        <ul className="mt-14 grid gap-x-8 gap-y-6 sm:grid-cols-3">
+        {/* Просто факты, а не пары «термин-определение», поэтому ul, а не dl. */}
+        <motion.ul
+          style={{ y: factsY }}
+          className="mt-20 grid gap-x-8 gap-y-6 sm:mt-24 sm:grid-cols-3"
+        >
           {project.facts.map((fact) => (
             <li
               key={fact}
@@ -135,7 +138,7 @@ export function ProjectBand({
               <LocaleTransition>{fact}</LocaleTransition>
             </li>
           ))}
-        </ul>
+        </motion.ul>
 
         <div className="mt-10 flex justify-center">
           <Disclosure

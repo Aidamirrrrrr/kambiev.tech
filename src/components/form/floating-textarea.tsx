@@ -1,7 +1,5 @@
 "use client";
 
-/** Многострочное поле с плавающей подписью. */
-
 import { AnimatePresence, motion } from "framer-motion";
 import { useId, useState } from "react";
 
@@ -23,7 +21,6 @@ export function FloatingTextarea({
   const [focused, setFocused] = useState(false);
 
   const isActive = focused || value.length > 0;
-  // Показывать или нет решает форма: она знает, была ли попытка отправки.
   const showError = Boolean(error);
 
   return (

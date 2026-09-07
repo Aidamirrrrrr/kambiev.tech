@@ -1,5 +1,3 @@
-/** Главная страница: композиция секций. */
-
 import { cookies } from "next/headers";
 import { CursorMount } from "@/components/cursor-mount";
 import { About } from "@/components/sections/about";

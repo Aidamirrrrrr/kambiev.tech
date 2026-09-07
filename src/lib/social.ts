@@ -1,5 +1,3 @@
-/** Внешние профили. Используются и в контактах, и в подвале. */
-
 import { site } from "./site";
 
 export const socialLinks = [

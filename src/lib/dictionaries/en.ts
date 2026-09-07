@@ -1,5 +1,3 @@
-/** Английский словарь. Проверяется на совпадение с формой русского. */
-
 import type { Dictionary } from "./types";
 
 export const en: Dictionary = {
@@ -35,6 +33,7 @@ export const en: Dictionary = {
       "I build digital products end to end, from the server to the screen in your hand.",
     now: "VELIZHANIN · since December 2025",
     cta: "View projects",
+    ctaPrimary: "Start a project",
   },
   about: {
     label: "About me",
@@ -129,6 +128,7 @@ export const en: Dictionary = {
     title: "What I've",
     titleAccent: "built",
     cta: "Discuss a project",
+    ctaText: "Got something similar on your side?",
     moreTitle: "Other projects",
     p1facts: [
       "An API of five domain modules",
@@ -228,6 +228,7 @@ export const en: Dictionary = {
     titleAccent: "work together",
     text: "Open to job offers and to project work: product development, architecture, getting a project to production. I reply within a day.",
     cta: "Get in touch",
+    ctaTelegram: "Message on Telegram",
     stat1val: "24h",
     stat1label: "response time",
     stat2val: "RU / EN",

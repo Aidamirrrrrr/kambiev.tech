@@ -1,9 +1,7 @@
 /**
- * Разбор поля «как с вами связаться».
- *
  * Поле одно, а вариантов три: почта, ник в Telegram или телефон. Жёсткая маска
- * тут только мешала бы, поэтому вид определяется по тому, что человек набрал,
- * и маска применяется лишь к телефону.
+ * тут мешала бы, поэтому вид определяется по набранному, а маска применяется
+ * только к телефону.
  */
 
 export type ContactKind = "email" | "telegram" | "phone" | "unknown";
@@ -12,7 +10,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 const TELEGRAM = /^@[a-z0-9_]{5,32}$/i;
 const TELEGRAM_LINK = /^(?:https?:\/\/)?t\.me\/([a-z0-9_]{5,32})$/i;
 
-/** Что человек, судя по всему, вводит. Порядок проверок важен: «@ivan» это ник, а не почта. */
+/** Порядок проверок важен: «@ivan» это ник, а не почта. */
 export function detectContactKind(raw: string): ContactKind {
   const value = raw.trim();
   if (!value) return "unknown";
@@ -26,11 +24,7 @@ export function detectContactKind(raw: string): ContactKind {
   return "unknown";
 }
 
-/**
- * Приводит российский номер к виду +7 (999) 123-45-67.
- * Набранное не из телефона возвращается как есть: маска не должна мешать
- * тому, кто пишет почту или ник.
- */
+/** Набранное не из цифр возвращается как есть: маска не мешает почте и нику. */
 export function formatPhone(raw: string): string {
   let digits = raw.replace(/\D/g, "");
   if (!digits) return raw.trimStart() === "+" ? "+" : "";
@@ -50,7 +44,6 @@ export function formatPhone(raw: string): string {
   return out;
 }
 
-/** Готово ли значение к отправке. */
 export function isContactValid(raw: string): boolean {
   const value = raw.trim();
   switch (detectContactKind(value)) {

@@ -1,11 +1,7 @@
-/** Общие помощники для работы с Telegram Bot API. */
-
 const TELEGRAM_API = "https://api.telegram.org";
 
-/** Предел длины текста одного сообщения в Telegram. */
 export const MAX_MESSAGE_LENGTH = 4096;
 
-/** Экранирует спецсимволы HTML для parse_mode: "HTML". */
 export function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -13,7 +9,6 @@ export function escapeHtml(value: string) {
     .replace(/>/g, "&gt;");
 }
 
-/** Обрезает текст до предела, добавляя пометку об усечении. */
 export function truncate(value: string, limit: number) {
   if (value.length <= limit) return value;
   return `${value.slice(0, limit - 1)}…`;
@@ -34,14 +29,11 @@ function truncateEscaped(value: string, limit: number) {
   return `${cut}…`;
 }
 
-/** Поле шапки. Поля без значения не выводятся. */
 export type NotificationField = [label: string, value: string | undefined];
 
 /**
- * Собирает уведомление в едином виде: заголовок с источником, шапка из
- * подписанных полей и текст письма отдельной цитатой. Цитата нужна не для
- * красоты: она отделяет чужой текст от наших подписей, чтобы письмо не могло
- * притвориться служебной строкой.
+ * Текст автора уходит в цитату: так он не может притвориться нашей служебной
+ * строкой вроде «Кому:».
  */
 export function formatNotification({
   title,
@@ -72,7 +64,6 @@ export function formatNotification({
   );
 }
 
-/** Отправляет сообщение в чат. Бросает исключение, если Telegram ответил ошибкой. */
 export async function sendMessage(
   token: string,
   chatId: string,

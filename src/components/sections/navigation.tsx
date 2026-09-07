@@ -1,7 +1,5 @@
 "use client";
 
-/** Фиксированная навигация с переключателем языка. */
-
 import {
   AnimatePresence,
   motion,

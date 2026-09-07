@@ -3,7 +3,9 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { LocaleTransition } from "@/components/locale-transition";
+import { Action, Actions } from "@/components/ui/action";
 import { useI18n } from "@/lib/i18n";
+import { site } from "@/lib/site";
 
 export function CtaBanner() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -36,14 +38,14 @@ export function CtaBanner() {
           </p>
         </LocaleTransition>
 
-        <a
-          href="#contact"
-          className="mt-10 inline-flex items-center justify-center rounded-full bg-accent px-8 py-3.5 font-medium text-base text-page transition-colors duration-300 hover:bg-accent-strong"
-        >
-          <LocaleTransition className="inline">
-            {t.ctaBanner.cta}
-          </LocaleTransition>
-        </a>
+        <div className="mt-10">
+          <Actions>
+            <Action href="#contact">{t.ctaBanner.cta}</Action>
+            <Action href={site.telegram} variant="outline" external>
+              {t.ctaBanner.ctaTelegram}
+            </Action>
+          </Actions>
+        </div>
 
         <dl className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
           {stats.map((stat) => (

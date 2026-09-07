@@ -1,21 +1,16 @@
 "use client";
 
-/**
- * Секция проектов.
- *
- * Композиция одной полосы: категория, название, одна понятная фраза,
- * настоящий снимок продукта в рамке устройства, три факта строкой
- * и раскрытие с технической частью. Снимок здесь несёт основную нагрузку:
- * без него секция читается как пустая рамка с текстом.
- */
+/** Снимок несёт основную нагрузку: без него секция читается как рамка с текстом. */
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Disclosure } from "@/components/disclosure";
 import { LocaleTransition } from "@/components/locale-transition";
 import { ProjectBand } from "@/components/sections/project-band";
+import { Action, Actions } from "@/components/ui/action";
 import { useI18n } from "@/lib/i18n";
 import { getMoreProjects, getProjects } from "@/lib/projects";
+import { site } from "@/lib/site";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -94,6 +89,26 @@ export function Projects() {
               ))}
             </ul>
           </Disclosure>
+        </div>
+
+        {/*
+          Призыв прямо под работами: следующая секция с формой лежит через два
+          экрана, и убеждённому проектами читателю пришлось бы её искать.
+        */}
+        <div className="mt-16 border-line border-t pt-16">
+          <p className="text-fg-muted text-xl leading-relaxed">
+            <LocaleTransition className="inline">
+              {t.projects.ctaText}
+            </LocaleTransition>
+          </p>
+          <div className="mt-8">
+            <Actions>
+              <Action href="#contact">{t.projects.cta}</Action>
+              <Action href={site.telegram} variant="outline" external>
+                {t.ctaBanner.ctaTelegram}
+              </Action>
+            </Actions>
+          </div>
         </div>
       </motion.div>
     </section>

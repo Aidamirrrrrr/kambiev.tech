@@ -1,5 +1,3 @@
-/** Проверка и форматирование заявки. Вынесено из маршрута ради тестов. */
-
 import { formatNotification } from "./telegram";
 
 const LIMITS = { name: 100, contact: 200, message: 3000 } as const;
@@ -13,9 +11,8 @@ export type Payload = {
 };
 
 /**
- * Тело приходит из сети, поэтому проверяем и типы, и содержимое.
- * Без проверки типа `trim()` на числе бросал исключение, и клиент получал
- * 500 вместо внятного 400.
+ * Проверяем и типы, и содержимое: без проверки типа trim() на числе бросает
+ * исключение, и клиент получает 500 вместо внятного 400.
  */
 export function parsePayload(body: unknown): Payload | null {
   if (typeof body !== "object" || body === null) return null;

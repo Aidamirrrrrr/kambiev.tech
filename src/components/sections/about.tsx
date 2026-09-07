@@ -6,8 +6,6 @@ import { Disclosure } from "@/components/disclosure";
 import { LocaleTransition } from "@/components/locale-transition";
 import { useI18n } from "@/lib/i18n";
 
-/** Секция «О себе»: возможности, цифры и раскрытие с подробностями. */
-
 function Counter({
   value,
   suffix = "",

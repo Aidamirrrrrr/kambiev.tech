@@ -1,7 +1,5 @@
 "use client";
 
-/** Мягкий след за системным курсором и волна по клику. */
-
 import {
   AnimatePresence,
   motion,

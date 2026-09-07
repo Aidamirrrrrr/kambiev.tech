@@ -1,6 +1,3 @@
-/** Разбор письма. Вынесено из маршрута, чтобы покрыть тестами. */
-
-/** Приводит HTML-письмо к тексту: без разметки и лишних пустых строк. */
 export function htmlToText(html: string) {
   return html
     .replace(/<(script|style)[\s\S]*?<\/\1>/gi, "")

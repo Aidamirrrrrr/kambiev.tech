@@ -1,7 +1,5 @@
 "use client";
 
-/** Секция контактов: форма уходит в Telegram, рядом прямые контакты. */
-
 import { motion, useInView } from "framer-motion";
 import { Check } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
@@ -43,8 +41,7 @@ function ContactForm({
   const [error, setError] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
-  // Ошибки считаются от текущих значений, а поле само решает, показывать ли
-  // их: пока в него не заходили, ругаться не на что.
+  // Показывать ошибки или нет решает форма: поле не знает о попытке отправки.
   const errors = {
     name: formData.name.trim() ? undefined : t.contact.errName,
     contact: !formData.contact.trim()
@@ -59,7 +56,6 @@ function ContactForm({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
-    // Раньше форма молча делала return, и нажатие выглядело как поломка.
     if (hasErrors) {
       setShowErrors(true);
       return;
@@ -86,11 +82,8 @@ function ContactForm({
     }
   }
 
-  /*
-   * Подтверждение заменяет форму и никуда не исчезает само. Раньше оно было
-   * надписью на кнопке того же цвета, что и обычная, и гасло через четыре
-   * секунды, поэтому отправка выглядела так, будто ничего не произошло.
-   */
+  // Подтверждение заменяет форму и не гаснет само: иначе отправка выглядит так,
+  // будто ничего не произошло.
   if (submitted) {
     return (
       <motion.output

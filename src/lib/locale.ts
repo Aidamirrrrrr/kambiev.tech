@@ -1,5 +1,3 @@
-/** Разбор Accept-Language. Вынесено из proxy, чтобы покрыть тестами. */
-
 export const SUPPORTED_LOCALES = ["ru", "en"] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -8,10 +6,7 @@ export function isLocale(value: unknown): value is Locale {
   return SUPPORTED_LOCALES.includes(value as Locale);
 }
 
-/**
- * Возвращает первый поддерживаемый язык по убыванию веса q.
- * Русский — язык по умолчанию: сайт прежде всего для местного рынка.
- */
+/** Русский по умолчанию: сайт прежде всего для местного рынка. */
 export function parseAcceptLanguage(header: string): Locale {
   const languages = header
     .split(",")

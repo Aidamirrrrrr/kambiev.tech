@@ -1,6 +1,5 @@
-/** Приём заявки с формы и пересылка её в Telegram. */
-
 import { NextResponse } from "next/server";
+import { reportFailure } from "@/lib/alert";
 import { formatMessage, type Payload, parsePayload } from "@/lib/contact";
 import { sendMessage } from "@/lib/telegram";
 
@@ -23,6 +22,10 @@ export async function POST(request: Request) {
     console.error(
       "Contact form: TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы",
     );
+    await reportFailure(
+      "POST /api/contact",
+      new Error("TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы"),
+    );
     return NextResponse.json(
       { error: "Messaging is not configured" },
       { status: 500 },
@@ -33,6 +36,14 @@ export async function POST(request: Request) {
     await sendMessage(token, chatId, formatMessage(payload));
   } catch (error) {
     console.error("Contact form: не удалось отправить сообщение", error);
+    /*
+     * Заявка уже потеряна для основного бота, поэтому в алерт кладём контакт
+     * автора: по нему можно ответить руками, не дожидаясь починки.
+     */
+    await reportFailure("POST /api/contact", error, [
+      ["Заявка от", payload.name],
+      ["Контакт", payload.contact],
+    ]);
     return NextResponse.json({ error: "Failed to send" }, { status: 502 });
   }
 

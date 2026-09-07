@@ -1,13 +1,9 @@
-/**
- * Next.js proxy — определение локали по заголовку Accept-Language.
- * Устанавливает cookie `locale` при первом визите.
- */
+/** Определение языка по Accept-Language при первом визите. */
 import { type NextRequest, NextResponse } from "next/server";
 import { isLocale, parseAcceptLanguage } from "@/lib/locale";
 
 const COOKIE_NAME = "locale";
 
-/** Определяет язык и записывает в cookie. */
 export function proxy(request: NextRequest) {
   const response = NextResponse.next();
 

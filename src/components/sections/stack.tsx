@@ -9,7 +9,6 @@ import { type CategoryKey, type TechItem, techCategories } from "@/lib/stack";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-/** Чип одной технологии. */
 function TechChip({ item }: { item: TechItem }) {
   return (
     <a
@@ -23,7 +22,6 @@ function TechChip({ item }: { item: TechItem }) {
   );
 }
 
-/** Ряд одной категории стека. */
 function CategoryRow({ items, label }: { items: TechItem[]; label: string }) {
   return (
     <div>
@@ -51,9 +49,8 @@ export function Stack() {
     infra: t.stack.infra,
   };
 
-  // На виду только основное. Полный список из четырёх категорий разворачивается
-  // по клику: сорок с лишним названий подряд ничего не говорят читателю
-  // не из разработки и занимали два экрана.
+  // Полный список разворачивается по клику: сорок названий подряд ничего
+  // не говорят читателю не из разработки.
   const featured = techCategories.flatMap((c) =>
     c.items.filter((i) => i.featured),
   );

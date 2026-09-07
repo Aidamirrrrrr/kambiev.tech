@@ -28,11 +28,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       frame = requestAnimationFrame(raf);
     }
 
-    /*
-     * Клики по якорям Lenis сам не перехватывает: браузер уводит страницу
-     * мгновенным прыжком мимо него, и плавность оставалась только на колесе.
-     * Поэтому ссылки вида «#work» обрабатываем сами.
-     */
+    // Клики по якорям Lenis не перехватывает: браузер прыгает мимо него,
+    // поэтому ссылки вида «#work» обрабатываем сами.
     const onClick = (event: MouseEvent) => {
       if (
         event.defaultPrevented ||
@@ -80,8 +77,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
 
     return () => {
       document.removeEventListener("click", onClick);
-      // Раньше цикл rAF продолжал крутиться после destroy: ссылка на кадр
-      // никуда не сохранялась и отменить его было нечем.
+      // Кадр нужно сохранить: без этого цикл rAF продолжает крутиться после destroy.
       cancelAnimationFrame(frame);
       lenis?.destroy();
     };

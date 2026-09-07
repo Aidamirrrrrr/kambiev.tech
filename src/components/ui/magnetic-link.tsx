@@ -1,7 +1,5 @@
 "use client";
 
-/** Ссылка, которая слегка тянется к курсору. */
-
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useRef } from "react";
 

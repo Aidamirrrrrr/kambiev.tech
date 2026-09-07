@@ -1,13 +1,7 @@
-/**
- * Рамки устройств для снимков продуктов.
- *
- * Без рамки скриншот читается как случайная картинка. Рамка задаёт масштаб
- * и сразу говорит, где это открыто: в браузере или на телефоне.
- */
+/** Без рамки скриншот читается как случайная картинка. */
 
 import Image from "next/image";
 
-/** Окно браузера с адресной строкой. */
 export function BrowserFrame({
   src,
   alt,
@@ -47,7 +41,6 @@ export function BrowserFrame({
   );
 }
 
-/** Корпус телефона. */
 export function PhoneFrame({
   src,
   alt,
@@ -57,7 +50,6 @@ export function PhoneFrame({
 }: {
   src: string;
   alt: string;
-  /** Реальная ширина кадра на странице. */
   sizes: string;
   caption?: string;
   className?: string;

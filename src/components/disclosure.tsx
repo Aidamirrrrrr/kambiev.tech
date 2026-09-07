@@ -1,12 +1,6 @@
 "use client";
 
-/**
- * Раскрытие подробностей по клику.
- *
- * Верхний слой страницы держим коротким и понятным любому читателю,
- * а техническую конкретику прячем сюда: тот, кому она нужна, разворачивает
- * её сам. Кнопка несёт aria-expanded, поэтому состояние доступно скринридеру.
- */
+/** Техническая конкретика прячется сюда, чтобы верхний слой оставался коротким. */
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
@@ -32,10 +26,8 @@ export function Disclosure({
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        // Раскрытый блок существует в DOM только когда открыт, поэтому
-        // и ссылка на него ставится только тогда. Заодно это убирает
-        // расхождение при гидратации: на сервере атрибута нет, на клиенте
-        // при первом рендере тоже.
+        // Блок есть в DOM только когда открыт, поэтому и ссылка ставится только
+        // тогда: иначе расходится гидратация.
         aria-controls={open ? regionId : undefined}
         className="inline-flex items-center gap-1 font-medium text-accent text-base transition-colors hover:text-accent-strong"
       >

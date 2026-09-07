@@ -1,17 +1,12 @@
-/**
- * Приём входящей почты от Resend и пересылка её в Telegram.
- *
- * Resend шлёт только метаданные письма, поэтому тело и заголовки
- * забираются отдельным запросом к Receiving API по email_id.
- */
+/** Resend шлёт только метаданные, поэтому тело забирается отдельным запросом. */
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { Webhook } from "svix";
+import { reportFailure } from "@/lib/alert";
 import { htmlToText } from "@/lib/email";
 import { formatNotification, sendMessage, truncate } from "@/lib/telegram";
 
-/** Сколько символов тела письма помещаем в сообщение, оставляя место под шапку. */
 const MAX_BODY = 3000;
 
 export const dynamic = "force-dynamic";
@@ -33,19 +28,16 @@ export async function POST(request: Request) {
   const payload = await request.text();
 
   /*
-   * Заголовки отдаём целиком. Resend подписывает по спецификации Standard
-   * Webhooks и шлёт webhook-id / webhook-timestamp / webhook-signature, тогда
-   * как исторический префикс у Svix свой: svix-id и далее. Библиотека умеет
-   * оба, но выбирает через ??, поэтому подстановка пустой строки вместо
-   * отсутствующего svix-id глушила запасной вариант и запрос падал с
-   * Missing required headers. Ключи Headers уже в нижнем регистре.
+   * Заголовки отдаём целиком. Resend шлёт webhook-id и далее по спецификации
+   * Standard Webhooks, у Svix исторический префикс свой: svix-id. Библиотека
+   * знает оба, но выбирает через ??, поэтому пустая строка вместо
+   * отсутствующего svix-id глушит запасной вариант.
    */
   const headers = Object.fromEntries(request.headers);
 
   let event: { type?: string; data?: { email_id?: string } };
   try {
-    // verify ничего не возвращает, только бросает исключение при расхождении,
-    // поэтому событие разбираем сами из уже доверенного тела.
+    // verify ничего не возвращает, только бросает исключение при расхождении.
     new Webhook(secret).verify(payload, headers);
     event = JSON.parse(payload);
   } catch (error) {
@@ -58,11 +50,22 @@ export async function POST(request: Request) {
       }`,
       error,
     );
+
+    /*
+     * Алерт только если заголовки подписи вообще пришли: это похоже на живую
+     * доставку от Resend, которая не сошлась. Голые POST от сканеров ходят
+     * по любому публичному адресу и в уведомления попадать не должны.
+     */
+    if (signatureHeaders.length > 0) {
+      await reportFailure("POST /api/inbound-email", error, [
+        ["Заголовки подписи", signatureHeaders.join(", ")],
+      ]);
+    }
+
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  // Остальные события Resend нас не интересуют, но отвечаем успехом,
-  // чтобы он не копил повторные доставки.
+  // На остальные события отвечаем успехом, иначе Resend копит повторы.
   if (event.type !== "email.received" || !event.data?.email_id) {
     return NextResponse.json({ ok: true });
   }
@@ -100,6 +103,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Inbound email: не удалось переслать письмо", error);
+    await reportFailure("POST /api/inbound-email", error, [
+      ["Письмо", event.data.email_id],
+    ]);
     // 500 заставит Resend повторить доставку позже.
     return NextResponse.json({ error: "Forwarding failed" }, { status: 500 });
   }

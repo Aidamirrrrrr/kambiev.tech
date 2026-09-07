@@ -1,7 +1,5 @@
 "use client";
 
-/** Поле ввода с плавающей подписью. */
-
 import { motion } from "framer-motion";
 import { useId, useState } from "react";
 
@@ -22,12 +20,10 @@ export function FloatingField({
   type?: string;
   value: string;
   onChange: (val: string) => void;
-  /** Текст ошибки. Показывается только после того, как поле покидали. */
   error?: string;
   hint?: string;
   inputMode?: "text" | "email" | "tel";
   autoComplete?: string;
-  /** Маска: приводит ввод к нужному виду прямо во время набора. */
   transform?: (val: string) => string;
   index: number;
   isInView: boolean;
@@ -37,7 +33,6 @@ export function FloatingField({
   const [focused, setFocused] = useState(false);
 
   const isActive = focused || value.length > 0;
-  // Показывать или нет решает форма: она знает, была ли попытка отправки.
   const showError = Boolean(error);
   const message = showError ? error : hint;
 
@@ -61,10 +56,8 @@ export function FloatingField({
         }
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        /*
-         * 16px обязательны: Safari на iOS увеличивает страницу при фокусе
-         * на поле с меньшим шрифтом, и вернуть масштаб потом нечем.
-         */
+        // 16px обязательны: Safari на iOS увеличивает страницу при фокусе
+        // на поле с меньшим шрифтом, и вернуть масштаб потом нечем.
         className={`peer w-full border-b-2 bg-transparent pt-6 pb-2 text-base text-fg outline-none transition-colors duration-300 ${
           showError
             ? "border-red-600"

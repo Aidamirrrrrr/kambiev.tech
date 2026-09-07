@@ -1,9 +1,4 @@
-/**
- * Типы и данные витрины проектов.
- *
- * Тексты живут в словарях и подставляются функцией ниже: массив зависит
- * от текущего языка, поэтому это функция, а не константа.
- */
+/** Тексты живут в словарях, поэтому проекты собираются функцией от языка. */
 
 import type { Dictionary } from "./dictionaries/types";
 
@@ -26,7 +21,6 @@ export interface Project {
   media: Media;
 }
 
-/** Витрина: проекты со снимками и раскрытием. */
 export function getProjects(t: Dictionary): Project[] {
   return [
     {
@@ -140,7 +134,6 @@ export function getProjects(t: Dictionary): Project[] {
   ];
 }
 
-/** Компактный список работ под витриной. */
 export function getMoreProjects(t: Dictionary) {
   return [
     { name: t.projects.m1name, description: t.projects.m1desc, year: "2026" },

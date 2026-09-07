@@ -1,11 +1,10 @@
 "use client";
 
-/** Главный экран: имя, одна понятная фраза о работе, действие и витрина работ. */
-
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { BrowserFrame, PhoneFrame } from "@/components/device-frame";
 import { LocaleTransition } from "@/components/locale-transition";
+import { Action, Actions } from "@/components/ui/action";
 import { useI18n } from "@/lib/i18n";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -14,15 +13,22 @@ export function Hero() {
   const { t } = useI18n();
   const ref = useRef<HTMLElement>(null);
 
-  // Витрина на первом экране: телефоны уходят вниз медленнее центрального окна,
-  // из-за чего связка читается объёмной, а не плоской картинкой.
+  /*
+   * Витрина разъезжается по глубине: центральное окно уходит вверх и слегка
+   * наезжает на зрителя, телефоны отстают и расходятся в стороны. Три слоя
+   * с разной скоростью читаются объёмом, а не сдвинутой картинкой.
+   */
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
-  const centerY = useTransform(scrollYProgress, [0, 1], ["0%", "-14%"]);
-  const sideY = useTransform(scrollYProgress, [0, 1], ["0%", "6%"]);
-  const lineupOpacity = useTransform(scrollYProgress, [0.55, 1], [1, 0.4]);
+  const centerY = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
+  const centerScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const sideY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const sideScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const leftX = useTransform(scrollYProgress, [0, 1], ["0%", "-14%"]);
+  const rightX = useTransform(scrollYProgress, [0, 1], ["0%", "14%"]);
+  const lineupOpacity = useTransform(scrollYProgress, [0.5, 1], [1, 0.25]);
 
   return (
     <section
@@ -64,17 +70,17 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.5, ease }}
-          className="mt-10 flex items-center justify-center"
+          className="mt-10"
         >
-          <a
-            href="#work"
-            className="inline-flex items-center justify-center rounded-full bg-accent px-8 py-3.5 font-medium text-base text-page transition-colors duration-300 hover:bg-accent-strong"
-          >
-            <LocaleTransition className="inline">{t.hero.cta}</LocaleTransition>
-          </a>
+          <Actions>
+            <Action href="#contact">{t.hero.ctaPrimary}</Action>
+            <Action href="#work" variant="outline">
+              {t.hero.cta}
+            </Action>
+          </Actions>
         </motion.div>
 
-        {/* Где я сейчас: рекрутер ищет это первым, поэтому строка есть, но тихая. */}
+        {/* Рекрутер ищет это первым, поэтому строка есть, но тихая. */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -90,16 +96,9 @@ export function Hero() {
       </div>
 
       {/*
-        Витрина работ прямо на первом экране: без неё хиро остаётся текстом
-        в пустоте. Телефоны по бокам показываются с планшета, чтобы на узком
-        экране не мельчить.
-
-        Анимации появления здесь намеренно нет. Центральный кадр это
-        LCP-элемент страницы, и пока он стартовал с нулевой прозрачностью
-        и ждал задержки в 0.85с, задержка отрисовки на мобильном профиле
-        доходила до 3.1с при том, что картинка весит 40 КБ и грузится
-        мгновенно. Осталась только прозрачность от скролла, стартующая
-        с единицы.
+        Анимации появления здесь намеренно нет: центральный кадр это
+        LCP-элемент, и стартовая прозрачность с задержкой доводила render
+        delay на мобильном профиле до 3.1с. Движение только от скролла.
       */}
       <div className="mx-auto mt-16 w-full max-w-6xl">
         <motion.div
@@ -107,7 +106,7 @@ export function Hero() {
           className="flex w-full items-end justify-center gap-6 lg:gap-10"
         >
           <motion.div
-            style={{ y: sideY }}
+            style={{ y: sideY, x: leftX, scale: sideScale }}
             className="hidden w-[15%] max-w-[200px] shrink-0 md:block"
           >
             <PhoneFrame
@@ -118,7 +117,7 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            style={{ y: centerY }}
+            style={{ y: centerY, scale: centerScale }}
             className="w-full min-w-0 max-w-3xl"
           >
             <BrowserFrame
@@ -131,7 +130,7 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            style={{ y: sideY }}
+            style={{ y: sideY, x: rightX, scale: sideScale }}
             className="hidden w-[15%] max-w-[200px] shrink-0 md:block"
           >
             <PhoneFrame

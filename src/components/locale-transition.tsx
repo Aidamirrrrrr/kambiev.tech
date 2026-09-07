@@ -9,10 +9,7 @@ import {
 } from "react";
 import { useI18n } from "@/lib/i18n";
 
-/**
- * Анимация смены языка — slide-up эффект.
- * Контейнер сохраняет размер через overflow:hidden — без сдвигов лейаута.
- */
+/** Смена языка со сдвигом вверх. Контейнер держит размер, чтобы не дёргалась раскладка. */
 export function LocaleTransition({
   children,
   className,
