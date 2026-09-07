@@ -130,7 +130,7 @@ export default async function RootLayout({
       addressLocality: site.city,
       addressCountry: site.countryCode,
     },
-    sameAs: [site.github, site.telegram],
+    sameAs: [site.telegram],
     knowsLanguage: [
       { "@type": "Language", name: "Russian" },
       { "@type": "Language", name: "English" },

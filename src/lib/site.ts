@@ -9,6 +9,7 @@ export const site = {
   jobTitle: "Fullstack Engineer",
   email: "hello@kambiev.tech",
   telegram: "https://t.me/aidamirkambiev",
+  /** Сейчас нигде не показывается, см. lib/social.ts. */
   github: "https://github.com/Aidamirrrrrr",
   city: "Saint Petersburg",
   countryCode: "RU",

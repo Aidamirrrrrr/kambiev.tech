@@ -11,7 +11,6 @@ const BODY = `# ${site.name} (${site.nameRu})
 - Сайт: ${site.url}
 - Почта: ${site.email}
 - Telegram: ${site.telegram}
-- GitHub: ${site.github}
 
 ## Основной стек
 
@@ -37,7 +36,6 @@ REST API, S3, Docker, GitHub Actions, Telegram Mini Apps, SwiftUI.
 - NeonVPN (2026, собственный продукт) — подписочный VPN-сервис из семи сервисов.
   Биллинг ЮKassa с автопродлением, автоматическая выдача доступов,
   2000+ пользователей с платящей аудиторией. Проект закрыт.
-  Исходники: https://github.com/Aidamirrrrrr/neon-vpn
 - Red Dragon Way (2026, коммерческий) — сайт онлайн-школы китайского языка
   на Next.js. Заявка на пробный урок уходит Telegram-ботом в рабочую группу.
 - Keel (2026, пет-проект) — расширение для VS Code поверх Ollama: модель
